@@ -1,7 +1,61 @@
-SELECT 
-  order_line_id AS sales_order_line_key,
-  stock_item_id AS product_key,
-  quantity,
-  unit_price,
-  quantity * unit_price AS gross_amount
-FROM `vit-lam-data.wide_world_importers.sales__order_lines` 
+-- WITH fact_sales_order_line AS(
+--   SELECT 
+--     CAST(order_line_id AS INTEGER) AS sales_order_line_key,
+--     CAST(order_id AS INT) AS sales_order_key,
+--     CAST(stock_item_id AS INTEGER) AS product_key,
+--     CAST(quantity AS INTEGER) AS quantity,
+--     CAST(unit_price AS NUMERIC) AS unit_price,
+--     quantity * unit_price AS gross_amount
+--   FROM `vit-lam-data.wide_world_importers.sales__order_lines` 
+--   LEFT JOIN `vit-lam-data.wide_world_importers.sales__order_lines` 
+-- )
+
+-- Select * from fact_sales_order_line
+
+
+
+-- Cách sài không có Ref dbt
+-- WITH fact_sales_order_line AS (
+--   SELECT 
+--     CAST(order_line_id AS INTEGER) AS sales_order_line_key,
+--     CAST(order_id AS INT) AS sales_order_key,
+--     CAST(stock_item_id AS INTEGER) AS product_key,
+--     CAST(quantity AS INTEGER) AS quantity,
+--     CAST(unit_price AS NUMERIC) AS unit_price,
+--     quantity * unit_price AS gross_amount
+--   FROM `vit-lam-data.wide_world_importers.sales__order_lines`
+-- ),
+-- stg_fact_sales_order AS (
+--   SELECT
+--     CAST(order_id AS INT) AS sales_order_key,
+--     CAST(customer_id AS INT) AS customer_key
+--   FROM `vit-lam-data.wide_world_importers.sales__orders`
+-- )
+-- SELECT
+--   fsol.*,
+--   sfso.customer_key
+-- FROM fact_sales_order_line fsol
+-- LEFT JOIN stg_fact_sales_order sfso
+--   ON fsol.sales_order_key = sfso.sales_order_key
+
+
+-- Cách sài có Ref Dbt
+-- Ref Dbt có nghĩa là nó tự hiểu được mối quan hệ của các bảng luôn
+-- ref() là hàm đặc biệt trong dbt dùng để liên kết giữa các model SQL với nhau.
+WITH fact_sales_order_line AS (
+  SELECT 
+    CAST(order_line_id AS INTEGER) AS sales_order_line_key,
+    CAST(order_id AS INT) AS sales_order_key,
+    CAST(stock_item_id AS INTEGER) AS product_key,
+    CAST(quantity AS INTEGER) AS quantity,
+    CAST(unit_price AS NUMERIC) AS unit_price,
+    quantity * unit_price AS gross_amount
+  FROM `vit-lam-data.wide_world_importers.sales__order_lines`
+)
+
+SELECT
+  fsol.*,
+  sfso.customer_key
+FROM fact_sales_order_line fsol
+LEFT JOIN {{ ref('stg_fact_sales_order') }} sfso
+  ON fsol.sales_order_key = sfso.sales_order_key
