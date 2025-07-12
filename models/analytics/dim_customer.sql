@@ -36,7 +36,8 @@ WITH dim_customer AS (
   FROM dim_customer
 )
 
-SELECT ds.*,dsc.customer_category_name,bg.buying_group_name
+SELECT ds.*, COALESCE(dsc.customer_category_name,'Invalid') AS customer_category_name,
+COALESCE(bg.buying_group_name,'Invalid') AS buying_group_name
 FROM dim_customer_convert ds
 LEFT JOIN {{ref('stg_dim_buying_group')}} bg
   ON ds.buying_group_key = bg.buying_group_key
