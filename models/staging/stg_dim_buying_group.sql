@@ -8,6 +8,3 @@ WITH dim_buyingGroup AS (
 SELECT * FROM dim_buyingGroup
 
 
--- buying_group_key
--- - buying_group_name
-

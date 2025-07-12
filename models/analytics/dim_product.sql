@@ -3,11 +3,24 @@ WITH dim_product AS (
         CAST(stock_item_id AS INT64) AS product_key,
         CAST(stock_item_name AS STRING) AS product_name,
         CAST(brand AS STRING) AS brand_name,
-        CAST(supplier_id AS INT) AS supplier_key
-    FROM
-        `vit-lam-data.wide_world_importers.warehouse__stock_items`
+        CAST(supplier_id AS INT) AS supplier_key,
+        CAST(is_chiller_stock AS BOOLEAN) AS is_chiller_stock_boolean
+        FROM `vit-lam-data.wide_world_importers.warehouse__stock_items`
+), dim_product_convert_boolean AS (
+        SELECT *, 
+    CASE 
+        WHEN is_chiller_stock_boolean IS TRUE THEN 'Chiller Stock'
+        WHEN is_chiller_stock_boolean IS FALSE THEN 'Not Chiller Stock'
+        WHEN is_chiller_stock_boolean IS NULL THEN 'Undefined'
+        ELSE 'Invalid'
+    END AS is_chiller_stock_status
+    FROM dim_product 
 )
+
+-- I want to conver null in brand name to undefined by using coalesce
 SELECT dp.*,ds.supplier_name
-FROM dim_product dp
+FROM dim_product_convert_boolean dp
 LEFT JOIN {{ref('dim_supplier')}} ds
  ON dp.supplier_key = ds.supplier_key
+
+
