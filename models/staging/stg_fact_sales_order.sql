@@ -25,14 +25,16 @@ WITH stg_fact_sales_order AS (
     SELECT 
     CAST(customer_id AS INT) AS customer_key,
     CAST(order_id AS INT) AS sales_order_key,
-    CAST(picked_by_person_id AS INT) AS picked_by_person_key
+    CAST(picked_by_person_id AS INT) AS picked_by_person_key,
+    CAST(order_date AS DATE) AS order_date
     FROM `vit-lam-data.wide_world_importers.sales__orders`
 )
 
 SELECT
   customer_key,
   sales_order_key,
-  COALESCE(picked_by_person_key,0) AS picked_by_person_key
+  COALESCE(picked_by_person_key,0) AS picked_by_person_key,
+  order_date
 FROM stg_fact_sales_order
 
 
@@ -40,3 +42,7 @@ FROM stg_fact_sales_order
 -- | Tên gốc                           | Tên mới             |
 -- |-----------------------------------|---------------------|
 -- | sales__orders.picked_by_person_id | picked_by_person_key|
+
+-- | Tên gốc                  | Tên mới    |
+-- |--------------------------|------------|
+-- | sales__orders.order_date | order_date |
