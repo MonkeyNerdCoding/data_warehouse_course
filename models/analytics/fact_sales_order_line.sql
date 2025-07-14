@@ -55,7 +55,10 @@ WITH fact_sales_order_line AS (
 
 SELECT
   fsol.*,
-  sfso.customer_key
+  COALESCE(sfso.customer_key,-1) AS customer_key,COALESCE(sfso.picked_by_person_key,-1) ASpicked_by_person_key
 FROM fact_sales_order_line fsol
 LEFT JOIN {{ ref('stg_fact_sales_order') }} sfso
   ON fsol.sales_order_key = sfso.sales_order_key
+
+
+-- - Trong model [`fact_sales_order_line`](../models/analytics/fact_sales_order_line.sql), khử null cột `customer_key` bằng cách đưa về `-1`.
